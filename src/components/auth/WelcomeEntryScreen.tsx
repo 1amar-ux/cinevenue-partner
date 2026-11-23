@@ -167,13 +167,10 @@ export const WelcomeEntryScreen: React.FC = () => {
           {/* TAB 1: COMMON SINGLE LOGIN FORM */}
           {activeTab === 'LOGIN' && (
             <div className="space-y-5">
-              <div className="space-y-1">
+              <div>
                 <h2 className="text-xl font-bold font-cinzel text-zinc-100">
                   Account Sign In
                 </h2>
-                <p className="text-xs text-zinc-400">
-                  Enter your credentials to access your authorized workspace.
-                </p>
               </div>
 
               {loginError && (
@@ -192,7 +189,6 @@ export const WelcomeEntryScreen: React.FC = () => {
                     type="text"
                     value={identifier}
                     onChange={e => setIdentifier(e.target.value)}
-                    placeholder="e.g. +91 98765 43210 or user@cinevenue.com"
                     required
                     className="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 rounded-xl text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-amber-500 transition-colors"
                   />
@@ -216,7 +212,6 @@ export const WelcomeEntryScreen: React.FC = () => {
                       type={showPassword ? 'text' : 'password'}
                       value={password}
                       onChange={e => setPassword(e.target.value)}
-                      placeholder="Enter your password"
                       required
                       className="w-full px-4 py-3 pr-10 bg-zinc-950 border border-zinc-800 rounded-xl text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-amber-500 transition-colors"
                     />
@@ -254,7 +249,6 @@ export const WelcomeEntryScreen: React.FC = () => {
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
                   <span>256-Bit Encrypted · Role-Based Routing</span>
                 </span>
-                <span className="text-zinc-600 font-mono text-[10px]">SECURE GATEWAY</span>
               </div>
             </div>
           )}
