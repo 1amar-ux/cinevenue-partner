@@ -339,3 +339,73 @@ export interface TheatreSettlementRecord {
   initiatedBy?: string;
   idempotencyKey?: string;
 }
+
+export interface EventOrganizer {
+  id: string;
+  name: string;
+  email: string;
+  passwordHash?: string;
+  contact?: string;
+  bankRouting: string;
+  commissionPercent: number;
+  avatar: string;
+}
+
+export interface EventCategory {
+  name: string;
+  price: number;
+  availableSeats: number;
+}
+
+export interface EventReview {
+  id: string;
+  userName: string;
+  userEmail: string;
+  rating: number;
+  comment: string;
+  date: string;
+}
+
+export interface Event {
+  id: string;
+  title: string;
+  description: string;
+  venueName: string;
+  venueAddress: string;
+  city: string;
+  latitude?: number;
+  longitude?: number;
+  date: string;
+  time: string;
+  image: string;
+  categories: EventCategory[];
+  reviews?: EventReview[];
+  featured?: boolean;
+  organizerId: string;
+  isPaid?: boolean;
+}
+
+export interface EventRegistration {
+  id: string;
+  eventId: string;
+  eventTitle: string;
+  venueName: string;
+  city?: string;
+  date: string;
+  time: string;
+  eventDate?: string;
+  eventTime?: string;
+  userName: string;
+  userEmail: string;
+  mobileNumber?: string;
+  categoryName: string;
+  ticketPrice: number;
+  quantity: number;
+  totalPrice: number;
+  status: 'Pending' | 'Confirmed' | 'Cancelled';
+  paymentMethod?: string;
+  bookingDate: string;
+  organizerApproved?: boolean;
+  superadminApproved?: boolean;
+}
+
