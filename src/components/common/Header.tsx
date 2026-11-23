@@ -225,27 +225,49 @@ export const Header: React.FC = () => {
           </div>
         </div>
 
-        {/* Zone 3: Account & Role Switcher Simulator Trigger */}
-        <div className="relative shrink-0">
-          <button
-            onClick={() => setIsRoleMenuOpen(!isRoleMenuOpen)}
-            className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-zinc-900 to-zinc-900/80 border border-amber-500/30 hover:border-amber-400/60 text-xs font-medium text-zinc-100 transition-all shadow-md shadow-amber-500/5 active:scale-95"
-          >
-            <div className="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-300 flex items-center justify-center font-bold text-xs border border-amber-500/30">
-              {userSession.name.charAt(0)}
-            </div>
-            <div className="text-left hidden sm:block">
-              <div className="font-semibold text-zinc-100 truncate max-w-[140px]">{userSession.name}</div>
-              <div className="text-[10px] text-amber-400 font-medium -mt-0.5">
-                {userSession.type === 'ADMIN'
-                  ? 'Super Admin'
-                  : userSession.type === 'REGISTRATION'
-                  ? 'Applicant'
-                  : `${getCategoryLabel(currentPartner?.category)} (${userSession.role})`}
+        {/* Zone 3: Account & Session Controls */}
+        <div className="flex items-center gap-2 shrink-0">
+          {/* Quick Lock & Exit Admin button (visible when Admin is logged in) */}
+          {userSession.type === 'ADMIN' && (
+            <button
+              onClick={logout}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-300 text-xs font-semibold transition-all cursor-pointer shadow-sm active:scale-95"
+              title="Lock Admin session and return to Common Sign-in"
+            >
+              <Lock className="w-3.5 h-3.5 text-rose-400" />
+              <span className="hidden sm:inline">Lock Admin</span>
+            </button>
+          )}
+
+          {/* Account & Role Switcher Simulator Trigger */}
+          <div className="relative shrink-0">
+            <button
+              onClick={() => setIsRoleMenuOpen(!isRoleMenuOpen)}
+              className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-zinc-900 to-zinc-900/80 border border-amber-500/30 hover:border-amber-400/60 text-xs font-medium text-zinc-100 transition-all shadow-md shadow-amber-500/5 active:scale-95"
+            >
+              <div className="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-300 flex items-center justify-center font-bold text-xs border border-amber-500/30">
+                {userSession.type === 'WELCOME' ? (
+                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                ) : (
+                  userSession.name.charAt(0) || 'U'
+                )}
               </div>
-            </div>
-            <ChevronDown className="w-4 h-4 text-zinc-400" />
-          </button>
+              <div className="text-left hidden sm:block">
+                <div className="font-semibold text-zinc-100 truncate max-w-[140px]">
+                  {userSession.type === 'WELCOME' ? 'Single Sign-In' : userSession.name}
+                </div>
+                <div className="text-[10px] text-amber-400 font-medium -mt-0.5">
+                  {userSession.type === 'WELCOME'
+                    ? 'Portal Gateway'
+                    : userSession.type === 'ADMIN'
+                    ? 'Super Admin'
+                    : userSession.type === 'REGISTRATION'
+                    ? 'Applicant'
+                    : `${getCategoryLabel(currentPartner?.category)} (${userSession.role})`}
+                </div>
+              </div>
+              <ChevronDown className="w-4 h-4 text-zinc-400" />
+            </button>
 
           {/* Quick Account Switcher Dropdown (Crucial for testing all requirements!) */}
           {isRoleMenuOpen && (
@@ -401,8 +423,9 @@ export const Header: React.FC = () => {
             </div>
           )}
         </div>
-
       </div>
-    </header>
+
+    </div>
+  </header>
   );
 };

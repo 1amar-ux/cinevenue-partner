@@ -71,6 +71,7 @@ interface AppContextType {
   setActiveAdminTab: (tab: 'AUTHPANEL' | 'PARTNERS' | 'AUDIT_LOGS') => void;
 
   // Auth & Navigation Actions
+  login: (identifier: string, password: string) => Promise<{ success: boolean; message: string; role?: string; status?: ApprovalStatus; partner?: PartnerBusiness }>;
   loginPartner: (identifier: string, password?: string) => Promise<{ success: boolean; message: string; partner?: PartnerBusiness; status?: ApprovalStatus }>;
   loginAdmin: (credentials: { username: string; password?: string; passcode?: string }) => Promise<{ success: boolean; message: string }>;
   logout: () => void;
@@ -454,19 +455,46 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
-  const loginPartner = async (identifier: string, password?: string) => {
-    const cleanId = identifier.trim().toLowerCase();
-    
-    // 1. Try backend POST /api/partners/login
+  // Unified Single Login Gateway: Automatic Admin & Partner Identification
+  const login = async (identifier: string, password: string): Promise<{ success: boolean; message: string; role?: string; status?: ApprovalStatus; partner?: PartnerBusiness }> => {
+    const cleanId = identifier.trim();
+    const cleanPass = password.trim();
+
+    if (!cleanId || !cleanPass) {
+      return { success: false, message: 'Please enter your registered mobile number or email address and password.' };
+    }
+
+    // 1. Central Backend Request (Single Unified Login Gateway)
     try {
       const res = await fetch('/api/partners/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: cleanId, mobile: cleanId, password })
+        body: JSON.stringify({ identifier: cleanId, email: cleanId, mobile: cleanId, password: cleanPass })
       });
       const data = await res.json();
-      
-      if (data && data.partner) {
+
+      // Case A: CineVenue Administrator
+      if (data.role === 'ADMIN' && (data.success || data.status === 'APPROVED')) {
+        setUserSession({
+          type: 'ADMIN',
+          partnerId: 'ADMIN-PORTAL',
+          name: data.user?.name || 'CineVenue Platform Administrator',
+          mobile: data.user?.mobile || '+91 1800 200 999',
+          role: 'ADMIN',
+          permissions: [
+            'QR_SCANNING', 'TICKET_VERIFICATION', 'POS_BOOKING', 'SHOW_TIMINGS',
+            'VIEW_SCREENS', 'CUSTOMER_ASSIST', 'REVENUE_VIEW', 'EMPLOYEE_ADMIN',
+            'BANK_SETTINGS', 'BUSINESS_SETTINGS'
+          ],
+          adminToken: data.token || data.accessToken
+        });
+        setActiveAdminTab('AUTHPANEL');
+        addAuditLog('ADMIN_AUTHENTICATED', 'Super Admin verified credentials and unlocked Founder Control Hub.');
+        return { success: true, message: data.message || 'Super Admin authentication verified.', role: 'ADMIN', status: 'APPROVED' };
+      }
+
+      // Case B: Partner Account (Approved or Status Gated)
+      if (data.partner) {
         const bp = mapBackendPartner(data.partner);
         setPartners(prev => {
           const map = new Map<string, PartnerBusiness>();
@@ -475,7 +503,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           return Array.from(map.values());
         });
 
-        if (data.success && bp.status === 'APPROVED') {
+        if (data.success && (data.status === 'APPROVED' || bp.status === 'APPROVED')) {
+          // Approved Partner -> Open respective Dashboard
           setUserSession({
             type: 'OWNER',
             partnerId: bp.id,
@@ -487,15 +516,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               'VIEW_SCREENS', 'CUSTOMER_ASSIST', 'REVENUE_VIEW', 'EMPLOYEE_ADMIN',
               'BANK_SETTINGS', 'BUSINESS_SETTINGS'
             ],
-            partnerToken: data.token
+            partnerToken: data.token || data.accessToken
           });
           setActiveLocationId(bp.activeLocationId || 'LOC-PUNE-01');
-          addAuditLog('PARTNER_LOGIN', `Partner '${bp.businessName}' logged in successfully.`);
-          return { success: true, message: 'Login successful.', partner: bp, status: 'APPROVED' };
+          addAuditLog('PARTNER_LOGIN', `Partner '${bp.businessName}' (${bp.category}) logged in successfully.`);
+          return { success: true, message: 'Login successful.', role: bp.category, status: 'APPROVED', partner: bp };
         } else {
-          // Gated statuses: PENDING, UNDER_REVIEW, MORE_INFO_REQUIRED, REJECTED, SUSPENDED
+          // Status Gated: PENDING, UNDER_REVIEW, MORE_INFO_REQUIRED, REJECTED, SUSPENDED
           setUserSession({
-            type: 'OWNER',
+            type: 'STATUS_CHECK',
             partnerId: bp.id,
             name: bp.ownerName,
             mobile: bp.mobile,
@@ -505,79 +534,43 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           return {
             success: false,
             message: data.message || `Application status: ${bp.status}`,
-            partner: bp,
-            status: bp.status
+            role: data.role || bp.category,
+            status: bp.status,
+            partner: bp
           };
         }
       }
+
+      // If backend explicitly rejected due to incorrect password or credentials
+      if (!res.ok || data.success === false) {
+        if (data.message && (data.message.toLowerCase().includes('password') || data.message.toLowerCase().includes('credentials'))) {
+          return { success: false, message: data.message };
+        }
+      }
     } catch (err) {
-      console.warn('Backend login fallback to local database:', err);
+      console.warn('Backend login request fallback to local checks:', err);
     }
 
-    // 2. Local database fallback
-    const localMatch = partners.find(p =>
-      p.email.toLowerCase().trim() === cleanId ||
-      p.mobile.replace(/\s+/g, '') === cleanId.replace(/\s+/g, '') ||
-      p.id.toLowerCase() === cleanId
-    );
+    // 2. Local Fallback (for offline or local simulated accounts)
+    const lowerId = cleanId.toLowerCase();
+    const cleanDigits = cleanId.replace(/\D/g, '');
+    const last10 = cleanDigits.length >= 10 ? cleanDigits.slice(-10) : '';
 
-    if (localMatch) {
-      setUserSession({
-        type: 'OWNER',
-        partnerId: localMatch.id,
-        name: localMatch.ownerName,
-        mobile: localMatch.mobile,
-        role: 'OWNER',
-        permissions: localMatch.status === 'APPROVED' ? [
-          'QR_SCANNING', 'TICKET_VERIFICATION', 'POS_BOOKING', 'SHOW_TIMINGS',
-          'VIEW_SCREENS', 'CUSTOMER_ASSIST', 'REVENUE_VIEW', 'EMPLOYEE_ADMIN',
-          'BANK_SETTINGS', 'BUSINESS_SETTINGS'
-        ] : []
-      });
-      if (localMatch.status === 'APPROVED') {
-        setActiveLocationId(localMatch.activeLocationId || 'LOC-PUNE-01');
-        return { success: true, message: 'Login successful.', partner: localMatch, status: 'APPROVED' };
-      } else {
-        return {
-          success: false,
-          message: `Application status: ${localMatch.status}`,
-          partner: localMatch,
-          status: localMatch.status
-        };
-      }
-    }
+    // Check if Administrator credentials match
+    const isAdminId =
+      lowerId === 'superadmin@cinevenue.com' ||
+      lowerId === 'admin' ||
+      lowerId === 'superadmin' ||
+      lowerId === 'amarnathgattem@gmail.com' ||
+      cleanDigits === '9876543210' ||
+      cleanDigits === '1800200999';
+    const isAdminPass =
+      cleanPass === 'Amarnath123' ||
+      cleanPass === 'SuperAdmin@2026' ||
+      cleanPass === 'asdfghjkl' ||
+      cleanPass === '8888';
 
-    return { success: false, message: 'No registered partner account found with these credentials. Please register or check application status.' };
-  };
-
-  const loginAdmin = async (credentials: { username: string; password?: string; passcode?: string }) => {
-    const { username, password = '', passcode = '' } = credentials;
-    const cleanUser = username.trim().toLowerCase();
-    const cleanPass = password.trim();
-    const cleanPin = passcode.trim();
-
-    // Check 1: Passcode 8888 or custom admin passcode
-    const isPinValid = cleanPin === '8888' || cleanPin === 'admin8888' || cleanPass === '8888' || cleanPass === 'admin8888';
-    
-    // Check 2: Super Admin credentials (email + password: 'superadmin@cinevenue.com' / 'admin' / 'superadmin' and password 'asdfghjkl')
-    const isCredsValid =
-      (cleanUser === 'superadmin@cinevenue.com' || cleanUser === 'admin' || cleanUser === 'superadmin' || cleanUser === 'founder') &&
-      (cleanPass === 'asdfghjkl' || cleanPass === 'admin8888' || cleanPass === '8888');
-
-    // Check 3: Backend verification attempt
-    let backendSuccess = false;
-    try {
-      const res = await fetch('/api/partners/stats/summary', {
-        headers: { 'x-admin-passcode': cleanPin || cleanPass || '8888' }
-      });
-      if (res.ok) {
-        backendSuccess = true;
-      }
-    } catch (e) {
-      // ignore
-    }
-
-    if (isPinValid || isCredsValid || (backendSuccess && (cleanPin || cleanPass))) {
+    if (isAdminId && isAdminPass) {
       setUserSession({
         type: 'ADMIN',
         partnerId: 'ADMIN-PORTAL',
@@ -593,10 +586,66 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       });
       setActiveAdminTab('AUTHPANEL');
       addAuditLog('ADMIN_AUTHENTICATED', 'Super Admin verified credentials and unlocked Founder Control Hub.');
-      return { success: true, message: 'Super Admin authentication verified.' };
+      return { success: true, message: 'Super Admin authentication verified.', role: 'ADMIN', status: 'APPROVED' };
     }
 
-    return { success: false, message: 'Access Denied: Invalid Master Admin credentials or security passcode.' };
+    // Check local partners store
+    const localMatch = partners.find(p => {
+      const pEmail = p.email?.toLowerCase().trim();
+      const pMobileDigits = (p.mobile || '').replace(/\D/g, '');
+      if (pEmail && pEmail === lowerId) return true;
+      if (last10 && pMobileDigits && pMobileDigits.endsWith(last10)) return true;
+      if (p.id.toLowerCase() === lowerId) return true;
+      return false;
+    });
+
+    if (localMatch) {
+      if (localMatch.status === 'APPROVED') {
+        setUserSession({
+          type: 'OWNER',
+          partnerId: localMatch.id,
+          name: localMatch.ownerName,
+          mobile: localMatch.mobile,
+          role: 'OWNER',
+          permissions: [
+            'QR_SCANNING', 'TICKET_VERIFICATION', 'POS_BOOKING', 'SHOW_TIMINGS',
+            'VIEW_SCREENS', 'CUSTOMER_ASSIST', 'REVENUE_VIEW', 'EMPLOYEE_ADMIN',
+            'BANK_SETTINGS', 'BUSINESS_SETTINGS'
+          ]
+        });
+        setActiveLocationId(localMatch.activeLocationId || 'LOC-PUNE-01');
+        return { success: true, message: 'Login successful.', role: localMatch.category, status: 'APPROVED', partner: localMatch };
+      } else {
+        setUserSession({
+          type: 'STATUS_CHECK',
+          partnerId: localMatch.id,
+          name: localMatch.ownerName,
+          mobile: localMatch.mobile,
+          role: 'OWNER',
+          permissions: []
+        });
+        return {
+          success: false,
+          message: `Application status: ${localMatch.status}`,
+          role: localMatch.category,
+          status: localMatch.status,
+          partner: localMatch
+        };
+      }
+    }
+
+    return {
+      success: false,
+      message: 'No registered account found with these credentials. Please check your mobile/email or register.'
+    };
+  };
+
+  const loginPartner = async (identifier: string, password?: string) => {
+    return login(identifier, password || 'Partner@123');
+  };
+
+  const loginAdmin = async (credentials: { username: string; password?: string; passcode?: string }) => {
+    return login(credentials.username, credentials.password || credentials.passcode || '8888');
   };
 
   const logout = () => {
@@ -982,6 +1031,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         auditLogs,
         activeAdminTab,
         setActiveAdminTab,
+        login,
         loginPartner,
         loginAdmin,
         logout,
