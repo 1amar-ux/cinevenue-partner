@@ -101,9 +101,8 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab })
             <button
               key={item.id}
               onClick={() => setActiveTab(item.id)}
-              className={`flex flex-col items-center justify-center h-full min-h-[44px] transition-colors relative cursor-pointer ${
-                isActive ? 'text-amber-400 font-semibold' : 'text-zinc-500 hover:text-zinc-300'
-              }`}
+              className={`flex flex-col items-center justify-center h-full min-h-[44px] transition-colors relative cursor-pointer ${isActive ? 'text-amber-400 font-semibold' : 'text-zinc-500 hover:text-zinc-300'
+                }`}
             >
               {isActive && (
                 <div className="absolute top-0 w-8 h-1 bg-amber-400 rounded-b-full shadow-lg shadow-amber-400/50" />

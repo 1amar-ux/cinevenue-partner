@@ -198,10 +198,10 @@ export const TheatreDashboard: React.FC<TheatreDashboardProps> = ({ activeTab: e
 
   return (
     <div className="space-y-6 animate-fade-in select-none">
-      
+
       {/* 1. TOP MULTI-THEATRE SELECTION SWITCHER BAR */}
       <div className="bg-gradient-to-r from-zinc-900 via-zinc-900 to-zinc-950 border border-amber-500/30 rounded-3xl p-4 sm:p-5 shadow-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        
+
         {/* Active Theatre Identity */}
         <div className="flex items-center gap-3.5">
           <div className="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/40 text-amber-400 flex items-center justify-center font-bold shadow-lg shadow-amber-500/10 shrink-0">
@@ -263,18 +263,16 @@ export const TheatreDashboard: React.FC<TheatreDashboardProps> = ({ activeTab: e
             <button
               key={tab.id}
               onClick={() => setInternalTab(tab.id)}
-              className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-                isActive
+              className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${isActive
                   ? 'bg-amber-400 text-zinc-950 shadow-md shadow-amber-400/20 font-bold'
                   : 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/60'
-              }`}
+                }`}
             >
               <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-zinc-950' : 'text-amber-400'}`} />
               <span>{tab.label}</span>
               {tab.badge && (
-                <span className={`text-[9px] px-1.5 py-0.5 rounded font-extrabold ${
-                  isActive ? 'bg-zinc-950 text-amber-300' : 'bg-amber-500/20 text-amber-300'
-                }`}>
+                <span className={`text-[9px] px-1.5 py-0.5 rounded font-extrabold ${isActive ? 'bg-zinc-950 text-amber-300' : 'bg-amber-500/20 text-amber-300'
+                  }`}>
                   {tab.badge}
                 </span>
               )}
