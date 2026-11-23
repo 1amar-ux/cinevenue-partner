@@ -388,7 +388,7 @@ export const WelcomeEntryScreen: React.FC = () => {
       {/* Forgot Password Modal */}
       {forgotModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 sm:p-8 max-w-md w-full space-y-4 shadow-2xl relative">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 sm:p-8 max-w-md w-full max-h-[90vh] overflow-y-auto space-y-4 shadow-2xl relative">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-bold font-cinzel text-zinc-100 flex items-center gap-2">
                 <KeyRound className="w-5 h-5 text-amber-400" />

@@ -153,7 +153,7 @@ export const RegistrationWizard: React.FC = () => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto p-4 sm:p-8 space-y-8">
+    <div className="max-w-5xl mx-auto p-3 sm:p-8 space-y-6 sm:space-y-8">
       
       {/* Top Exit Navigation */}
       <div className="flex items-center justify-between pb-2 border-b border-zinc-800">
@@ -250,7 +250,7 @@ export const RegistrationWizard: React.FC = () => {
             <button
               disabled={!selectedCategory}
               onClick={() => setStep('FORM')}
-              className={`px-6 py-3 rounded-xl font-bold text-xs flex items-center gap-2 transition-all ${
+              className={`px-6 py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all w-full sm:w-auto ${
                 selectedCategory
                   ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-zinc-950 shadow-lg shadow-amber-500/20 hover:from-amber-400 hover:to-amber-500 cursor-pointer'
                   : 'bg-zinc-800 text-zinc-500 cursor-not-allowed'
@@ -265,7 +265,7 @@ export const RegistrationWizard: React.FC = () => {
 
       {/* Step 2: Comprehensive Registration Form */}
       {step === 'FORM' && selectedCategory && (
-        <form onSubmit={handleSubmit} className="space-y-8 bg-zinc-900/90 border border-amber-500/20 rounded-3xl p-6 sm:p-8 shadow-2xl">
+        <form onSubmit={handleSubmit} className="space-y-8 bg-zinc-900/90 border border-amber-500/20 rounded-3xl p-4 sm:p-8 shadow-2xl">
           
           <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
             <div>
@@ -521,7 +521,7 @@ export const RegistrationWizard: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex items-center justify-between pt-6 border-t border-zinc-800">
+          <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-6 border-t border-zinc-800">
             <button
               type="button"
               onClick={() => setStep('CATEGORY_SELECT')}
@@ -532,7 +532,7 @@ export const RegistrationWizard: React.FC = () => {
 
             <button
               type="submit"
-              className="px-8 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-zinc-950 font-bold text-xs hover:from-amber-400 hover:to-amber-500 transition-all shadow-xl shadow-amber-500/20 flex items-center gap-2 cursor-pointer"
+              className="px-8 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-zinc-950 font-bold text-xs hover:from-amber-400 hover:to-amber-500 transition-all shadow-xl shadow-amber-500/20 flex items-center justify-center gap-2 w-full sm:w-auto cursor-pointer"
             >
               <ShieldCheck className="w-4 h-4" />
               Submit Application to CineVenue Admin

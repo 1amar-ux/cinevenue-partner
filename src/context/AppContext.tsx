@@ -28,7 +28,17 @@ import {
   INITIAL_AUDIT_LOGS
 } from '../data/mockData';
 
-export type ViewMode = 'RESPONSIVE' | 'MOBILE_IPHONE' | 'MOBILE_ANDROID' | 'TABLET';
+export type ViewMode =
+  | 'RESPONSIVE'
+  | 'MOBILE_SMALL_ANDROID'
+  | 'MOBILE_IPHONE_SE'
+  | 'MOBILE_IPHONE_PRO'
+  | 'MOBILE_IPHONE_MAX'
+  | 'MOBILE_ANDROID_LARGE'
+  | 'TABLET_IPAD'
+  | 'MOBILE_IPHONE'
+  | 'MOBILE_ANDROID'
+  | 'TABLET';
 
 export interface AppUserSession {
   type: 'OWNER' | 'MANAGER' | 'EMPLOYEE' | 'ADMIN' | 'REGISTRATION' | 'WELCOME' | 'STATUS_CHECK';

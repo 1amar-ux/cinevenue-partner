@@ -119,26 +119,26 @@ export const Header: React.FC = () => {
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-zinc-950/95 backdrop-blur-md border-b border-amber-500/20 text-zinc-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
-        
+    <header className="sticky top-0 z-40 bg-zinc-950/95 backdrop-blur-md border-b border-amber-500/20 text-zinc-100 pt-safe">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 h-16 flex items-center justify-between gap-2 sm:gap-4">
+
         {/* Zone 1: Brand Wordmark (CineVenue Logo & Gold Crown Emblem) */}
-        <div className="flex items-center gap-3 shrink-0">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 via-amber-500 to-amber-700 p-0.5 shadow-lg shadow-amber-500/20 flex items-center justify-center">
+        <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
+          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-amber-400 via-amber-500 to-amber-700 p-0.5 shadow-lg shadow-amber-500/20 flex items-center justify-center shrink-0">
             <div className="w-full h-full bg-zinc-950 rounded-[10px] flex items-center justify-center">
-              <Film className="w-5 h-5 text-amber-400" />
+              <Film className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400" />
             </div>
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <span className="font-cinzel text-lg font-bold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-amber-500">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <span className="font-cinzel text-base sm:text-lg font-bold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-amber-500">
                 CINEVENUE
               </span>
-              <span className="text-xs font-extrabold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 tracking-wider">
+              <span className="text-[10px] sm:text-xs font-extrabold px-1 sm:px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 tracking-wider">
                 PARTNER
               </span>
             </div>
-            <span className="text-[10px] text-zinc-400 block -mt-1 font-medium tracking-tight">
+            <span className="text-[9px] sm:text-[10px] text-zinc-400 block -mt-1 font-medium tracking-tight truncate max-w-[140px] sm:max-w-none">
               CineVenue Entertainments Pvt Ltd
             </span>
           </div>
@@ -146,7 +146,7 @@ export const Header: React.FC = () => {
 
         {/* Zone 2: Context Controls (Location Switcher & Device Frame Toggler) */}
         <div className="hidden lg:flex items-center gap-4">
-          
+
           {/* Multi-Location Switcher (Only for Theatre Partner Owners with multiple venues) */}
           {userSession.role === 'OWNER' && currentPartner?.category === 'THEATRE_PARTNER' && currentPartner?.status === 'APPROVED' && (
             <div className="relative">
@@ -171,9 +171,8 @@ export const Header: React.FC = () => {
                         setActiveLocationId(loc.id);
                         setIsLocationMenuOpen(false);
                       }}
-                      className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between hover:bg-zinc-800 ${
-                        loc.id === activeLocationId ? 'bg-amber-500/10 text-amber-400 font-semibold' : 'text-zinc-300'
-                      }`}
+                      className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between hover:bg-zinc-800 ${loc.id === activeLocationId ? 'bg-amber-500/10 text-amber-400 font-semibold' : 'text-zinc-300'
+                        }`}
                     >
                       <div>
                         <div className="font-medium">{loc.name}</div>
@@ -194,30 +193,36 @@ export const Header: React.FC = () => {
           <div className="flex items-center p-1 bg-zinc-900 border border-zinc-800 rounded-lg text-xs">
             <button
               onClick={() => setViewMode('RESPONSIVE')}
-              className={`flex items-center gap-1 px-2 py-1 rounded transition-colors ${
-                viewMode === 'RESPONSIVE' ? 'bg-amber-500/20 text-amber-300 font-medium' : 'text-zinc-400 hover:text-zinc-200'
-              }`}
-              title="Full Responsive View"
+              className={`flex items-center gap-1 px-2 py-1 rounded transition-colors ${viewMode === 'RESPONSIVE' ? 'bg-amber-500/20 text-amber-300 font-medium' : 'text-zinc-400 hover:text-zinc-200'
+                }`}
+              title="Full Responsive Canvas (Desktop)"
             >
               <Monitor className="w-3.5 h-3.5" />
-              <span className="hidden xl:inline">Desktop</span>
+              <span className="hidden xl:inline">Responsive</span>
             </button>
             <button
-              onClick={() => setViewMode('MOBILE_IPHONE')}
-              className={`flex items-center gap-1 px-2 py-1 rounded transition-colors ${
-                viewMode === 'MOBILE_IPHONE' ? 'bg-amber-500/20 text-amber-300 font-medium' : 'text-zinc-400 hover:text-zinc-200'
-              }`}
-              title="Mobile iOS View"
+              onClick={() => setViewMode('MOBILE_IPHONE_PRO')}
+              className={`flex items-center gap-1 px-2 py-1 rounded transition-colors ${viewMode === 'MOBILE_IPHONE_PRO' || viewMode === 'MOBILE_IPHONE' ? 'bg-amber-500/20 text-amber-300 font-medium' : 'text-zinc-400 hover:text-zinc-200'
+                }`}
+              title="Apple iOS Simulator"
             >
               <Smartphone className="w-3.5 h-3.5" />
-              <span className="hidden xl:inline">Mobile</span>
+              <span className="hidden xl:inline">iPhone</span>
             </button>
             <button
-              onClick={() => setViewMode('TABLET')}
-              className={`flex items-center gap-1 px-2 py-1 rounded transition-colors ${
-                viewMode === 'TABLET' ? 'bg-amber-500/20 text-amber-300 font-medium' : 'text-zinc-400 hover:text-zinc-200'
-              }`}
-              title="Tablet View"
+              onClick={() => setViewMode('MOBILE_ANDROID_LARGE')}
+              className={`flex items-center gap-1 px-2 py-1 rounded transition-colors ${viewMode === 'MOBILE_ANDROID_LARGE' || viewMode === 'MOBILE_ANDROID' ? 'bg-amber-500/20 text-amber-300 font-medium' : 'text-zinc-400 hover:text-zinc-200'
+                }`}
+              title="Android Phone Simulator"
+            >
+              <Smartphone className="w-3.5 h-3.5 text-emerald-400" />
+              <span className="hidden xl:inline">Android</span>
+            </button>
+            <button
+              onClick={() => setViewMode('TABLET_IPAD')}
+              className={`flex items-center gap-1 px-2 py-1 rounded transition-colors ${viewMode === 'TABLET_IPAD' || viewMode === 'TABLET' ? 'bg-amber-500/20 text-amber-300 font-medium' : 'text-zinc-400 hover:text-zinc-200'
+                }`}
+              title="iPad / Tablet Simulator"
             >
               <Tablet className="w-3.5 h-3.5" />
               <span className="hidden xl:inline">Tablet</span>
@@ -263,8 +268,8 @@ export const Header: React.FC = () => {
                       {userSession.type === 'ADMIN'
                         ? 'Super Admin'
                         : userSession.type === 'REGISTRATION'
-                        ? 'Applicant'
-                        : `${getCategoryLabel(currentPartner?.category)} (${userSession.role})`}
+                          ? 'Applicant'
+                          : `${getCategoryLabel(currentPartner?.category)} (${userSession.role})`}
                     </div>
                   </div>
                   <ChevronDown className="w-4 h-4 text-zinc-400" />

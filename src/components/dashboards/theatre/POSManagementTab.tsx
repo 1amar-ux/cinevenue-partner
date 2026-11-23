@@ -346,7 +346,7 @@ export const POSManagementTab: React.FC = () => {
       {/* Printed Thermal Ticket Modal */}
       {printedTicket && (
         <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-amber-50 text-zinc-950 border-2 border-amber-400 rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl relative font-sans">
+          <div className="bg-amber-50 text-zinc-950 border-2 border-amber-400 rounded-3xl p-6 max-w-sm w-full max-h-[90vh] overflow-y-auto space-y-4 shadow-2xl relative font-sans">
             
             <div className="text-center space-y-1 border-b-2 border-dashed border-zinc-400 pb-3">
               <div className="font-cinzel text-lg font-black tracking-wider text-zinc-950">

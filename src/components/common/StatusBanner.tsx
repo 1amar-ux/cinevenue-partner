@@ -53,7 +53,7 @@ export const StatusBanner: React.FC = () => {
     <div className="max-w-4xl mx-auto p-4 sm:p-8 space-y-6 animate-fade-in">
       
       {/* Top Action Bar */}
-      <div className="flex items-center justify-between pb-2 border-b border-zinc-800">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 pb-2 border-b border-zinc-800">
         <button
           type="button"
           onClick={logout}
@@ -141,7 +141,7 @@ export const StatusBanner: React.FC = () => {
           <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
             <button
               onClick={() => switchPresetAccount('CINEVENUE_ADMIN')}
-              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-zinc-950 font-bold text-xs hover:from-amber-400 hover:to-amber-500 transition-all shadow-lg shadow-amber-500/20 flex items-center gap-2 cursor-pointer"
+              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-zinc-950 font-bold text-xs hover:from-amber-400 hover:to-amber-500 transition-all shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2 w-full sm:w-auto cursor-pointer"
             >
               <FileCheck className="w-4 h-4" />
               <span>Switch to Admin Panel (Review & Approve Partner)</span>

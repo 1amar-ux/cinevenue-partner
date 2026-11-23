@@ -29,11 +29,11 @@ export const LiveSeatMap: React.FC = () => {
         </div>
 
         {/* Show Selector */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
           <select
             value={activeShowId}
             onChange={e => setActiveShowId(e.target.value)}
-            className="bg-zinc-900 border border-amber-500/30 rounded-xl px-3 py-2 text-xs font-semibold text-amber-300 focus:outline-none"
+            className="w-full sm:w-auto bg-zinc-900 border border-amber-500/30 rounded-xl px-3 py-2 text-xs font-semibold text-amber-300 focus:outline-none"
           >
             {locationShows.map(s => (
               <option key={s.id} value={s.id}>
@@ -45,13 +45,16 @@ export const LiveSeatMap: React.FC = () => {
       </div>
 
       {/* Seat Grid Box */}
-      <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 text-center space-y-6 shadow-2xl">
+      <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-4 sm:p-6 text-center space-y-6 shadow-2xl">
         
         {/* Screen Visual */}
         <div className="max-w-md mx-auto space-y-2">
           <div className="h-2.5 bg-gradient-to-r from-transparent via-amber-400 to-transparent rounded-full shadow-lg shadow-amber-400/50" />
           <div className="text-[10px] uppercase font-bold text-zinc-500 tracking-widest">
             {activeShow?.screenName} — SILVER SCREEN VIEW
+          </div>
+          <div className="text-[10px] text-zinc-500 sm:hidden flex items-center justify-center gap-1">
+            <span>↔ Swipe horizontally to view all seats</span>
           </div>
         </div>
 

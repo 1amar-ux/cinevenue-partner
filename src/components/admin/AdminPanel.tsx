@@ -206,7 +206,7 @@ export const AdminPanel: React.FC = () => {
             <div className="flex items-center gap-2.5 text-xs text-zinc-300">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
               <span>Exact Central Founder Admin Panel Connection:</span>
-              <code className="bg-zinc-950 px-2.5 py-1 rounded text-amber-400 font-mono text-[11px] border border-zinc-800">
+              <code className="bg-zinc-950 px-2.5 py-1 rounded text-amber-400 font-mono text-[11px] border border-zinc-800 break-all">
                 {authpanelUrl}
               </code>
             </div>
@@ -638,7 +638,7 @@ export const AdminPanel: React.FC = () => {
       {/* Rejection Modal */}
       {rejectionModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <form onSubmit={handleRejectSubmit} className="bg-zinc-900 border border-rose-500/40 rounded-3xl p-6 max-w-md w-full space-y-4 shadow-2xl">
+          <form onSubmit={handleRejectSubmit} className="bg-zinc-900 border border-rose-500/40 rounded-3xl p-6 max-w-md w-full max-h-[90vh] overflow-y-auto space-y-4 shadow-2xl">
             <h3 className="text-base font-bold text-rose-400 font-cinzel">
               Reject Partner Application
             </h3>
@@ -677,7 +677,7 @@ export const AdminPanel: React.FC = () => {
       {/* Request More Information Modal */}
       {moreInfoModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <form onSubmit={handleMoreInfoSubmit} className="bg-zinc-900 border border-blue-500/40 rounded-3xl p-6 max-w-md w-full space-y-4 shadow-2xl">
+          <form onSubmit={handleMoreInfoSubmit} className="bg-zinc-900 border border-blue-500/40 rounded-3xl p-6 max-w-md w-full max-h-[90vh] overflow-y-auto space-y-4 shadow-2xl">
             <h3 className="text-base font-bold text-blue-400 font-cinzel flex items-center gap-2">
               <HelpCircle className="w-5 h-5" />
               <span>Request Additional Verification Information</span>
@@ -717,7 +717,7 @@ export const AdminPanel: React.FC = () => {
       {/* Document Inspection & Preview Modal */}
       {docPreviewModalOpen && selectedDoc && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-zinc-900 border border-amber-500/30 rounded-3xl p-6 sm:p-8 max-w-lg w-full space-y-5 shadow-2xl relative">
+          <div className="bg-zinc-900 border border-amber-500/30 rounded-3xl p-6 sm:p-8 max-w-lg w-full max-h-[90vh] overflow-y-auto space-y-5 shadow-2xl relative">
             <div className="flex items-center justify-between pb-3 border-b border-zinc-800">
               <div className="flex items-center gap-2.5">
                 <FileText className="w-5 h-5 text-amber-400" />

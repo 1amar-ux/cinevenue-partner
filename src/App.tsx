@@ -73,14 +73,21 @@ const MainAppContent: React.FC = () => {
     }
   };
 
+  const isNavActive =
+    userSession.type !== 'WELCOME' &&
+    userSession.type !== 'ADMIN' &&
+    userSession.type !== 'REGISTRATION' &&
+    userSession.type !== 'STATUS_CHECK' &&
+    Boolean(currentPartner && currentPartner.status === 'APPROVED');
+
   return (
     <DeviceFrame>
-      <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col pb-20">
+      <div className={`min-h-screen bg-zinc-950 text-zinc-100 flex flex-col ${isNavActive ? 'pb-24' : 'pb-6'}`}>
         {/* Top Header Contract */}
         <Header />
 
         {/* Dynamic Main View */}
-        <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6">
+        <main className="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-6 overflow-x-hidden">
           {renderRoleDashboard()}
         </main>
 

@@ -126,7 +126,7 @@ export const MovieShowScheduler: React.FC = () => {
       {/* Create Show Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <form onSubmit={handleCreateShowSubmit} className="bg-zinc-900 border border-amber-500/40 rounded-3xl p-6 max-w-lg w-full space-y-4 shadow-2xl">
+          <form onSubmit={handleCreateShowSubmit} className="bg-zinc-900 border border-amber-500/40 rounded-3xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto space-y-4 shadow-2xl">
             <h3 className="text-base font-bold text-amber-400 font-cinzel">
               Schedule New Movie Show
             </h3>

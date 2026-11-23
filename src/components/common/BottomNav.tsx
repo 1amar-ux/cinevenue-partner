@@ -89,8 +89,11 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab })
   }
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-zinc-950/95 backdrop-blur-md border-t border-amber-500/20 pb-safe">
-      <div className="max-w-md mx-auto h-16 grid grid-cols-4 sm:grid-cols-5 items-center px-2">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-zinc-950/95 backdrop-blur-md border-t border-amber-500/20 pb-safe select-none">
+      <div
+        className="max-w-md mx-auto h-16 grid items-center px-1 sm:px-2"
+        style={{ gridTemplateColumns: `repeat(${navItems.length}, minmax(0, 1fr))` }}
+      >
         {navItems.map(item => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;
@@ -98,15 +101,15 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab })
             <button
               key={item.id}
               onClick={() => setActiveTab(item.id)}
-              className={`flex flex-col items-center justify-center h-full min-h-[44px] transition-colors relative ${
+              className={`flex flex-col items-center justify-center h-full min-h-[44px] transition-colors relative cursor-pointer ${
                 isActive ? 'text-amber-400 font-semibold' : 'text-zinc-500 hover:text-zinc-300'
               }`}
             >
               {isActive && (
                 <div className="absolute top-0 w-8 h-1 bg-amber-400 rounded-b-full shadow-lg shadow-amber-400/50" />
               )}
-              <Icon className={`w-5 h-5 transition-transform ${isActive ? 'scale-110 text-amber-400' : ''}`} />
-              <span className="text-[10px] tracking-tight mt-1 truncate max-w-full px-1">
+              <Icon className={`w-4 h-4 sm:w-5 sm:h-5 transition-transform ${isActive ? 'scale-110 text-amber-400' : ''}`} />
+              <span className="text-[9px] sm:text-[10px] tracking-tight mt-1 truncate max-w-full px-0.5">
                 {item.label}
               </span>
             </button>
