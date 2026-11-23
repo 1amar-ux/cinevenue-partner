@@ -153,21 +153,28 @@ export interface Show {
 
 export interface Booking {
   id: string;
-  ticketCode: string;
-  showId: string;
+  ticketCode?: string;
+  showId?: string;
   movieTitle: string;
-  screenName: string;
-  locationName: string;
-  showDate: string;
-  showTime: string;
+  screenName?: string;
+  locationName?: string;
+  theatreName?: string;
+  showDate?: string;
+  showTime?: string;
+  timeSlot?: string;
   seats: string[];
-  categoryName: string;
-  totalAmount: number;
-  customerName: string;
-  customerPhone: string;
-  paymentMethod: 'ONLINE' | 'POS_CASH' | 'POS_UPI' | 'POS_CARD';
-  status: 'CONFIRMED' | 'CANCELLED' | 'CHECKED_IN';
-  bookedAt: string;
+  categoryName?: string;
+  totalAmount?: number;
+  totalPrice?: number;
+  customerName?: string;
+  userName?: string;
+  customerPhone?: string;
+  mobileNumber?: string;
+  userEmail?: string;
+  paymentMethod?: any;
+  status: any;
+  date?: string;
+  bookedAt?: string;
   scannedAt?: string;
   scannedBy?: string;
 }
@@ -233,4 +240,102 @@ export interface Settlement {
   status: 'PAID' | 'PROCESSING' | 'PENDING';
   payoutDate?: string;
   transactionRef?: string;
+}
+
+
+export interface Theatre {
+  id: number | string;
+  name: string;
+  location: string;
+  address?: string;
+  city?: string;
+  district?: string;
+  state?: string;
+  pincode?: string;
+  features?: string[];
+  price?: string;
+  img?: string;
+  image?: string;
+  rating?: number | string;
+  screens?: any[];
+  facilities?: string[];
+  bankRouting?: string;
+  lastSettleDate?: string;
+  customAllocPercent?: number;
+  seatRows?: string[];
+  seatsPerRow?: number;
+  premiumRows?: string[];
+  blockedSeats?: string[];
+  seatPrices?: { [row: string]: number };
+}
+
+export interface MovieSchedule {
+  id: string;
+  movieTitle: string;
+  theatreName: string;
+  timeSlot: string;
+  pricePerSeat: number;
+  date: string;
+  isDeployed?: boolean;
+  isActive?: boolean;
+  screenName?: string;
+  interval?: number;
+  bookingWindow?: string;
+}
+
+export type BankVerificationStatus =
+  | 'Not Added'
+  | 'Pending Verification'
+  | 'Verified'
+  | 'Rejected'
+  | 'Suspended';
+
+export interface TheatreBankAccount {
+  id: string;
+  theatreId: number | string;
+  theatreName?: string;
+  accountHolderName: string;
+  bankName: string;
+  encryptedAccountNumber?: string;
+  maskedAccountNumber: string;
+  ifscCode: string;
+  accountType: 'Current' | 'Savings';
+  branchName: string;
+  branchAddress?: string;
+  beneficiaryName: string;
+  pan?: string;
+  gstin?: string;
+  upiId?: string;
+  verificationStatus: BankVerificationStatus;
+  isPrimary: boolean;
+  verifiedBy?: string;
+  verifiedAt?: string;
+  verificationNotes?: string;
+  createdBy: string;
+  createdAt: string;
+  updatedBy?: string;
+  updatedAt?: string;
+  isActive: boolean;
+}
+
+export interface TheatreSettlementRecord {
+  id: string;
+  theatreId: number | string;
+  theatreName: string;
+  bankAccountId?: string;
+  maskedAccountNumber?: string;
+  ifscCode?: string;
+  beneficiaryName?: string;
+  bankName?: string;
+  periodStart: string;
+  periodEnd: string;
+  grossSales: number;
+  commission: number;
+  taxes: number;
+  netAmount: number;
+  status: 'PENDING' | 'PROCESSING' | 'SETTLED' | 'FAILED' | 'ON_HOLD';
+  utr?: string;
+  settlementDate: string;
+  initiatedBy?: string;
+  idempotencyKey?: string;
 }

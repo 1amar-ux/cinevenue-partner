@@ -124,3 +124,15 @@ p, h1, h2, h3, h4, h5, h6, span, div, a {
   scrollbar-width: none;
 }
 
+
+/* Gold & Theatre Theme Variables & Helpers */
+.text-gold { color: #d4af37; }
+.bg-gold { background-color: #d4af37; }
+.border-gold { border-color: #d4af37; }
+.text-gold-light { color: #f3e5ab; }
+.bg-gold-light { background-color: #f3e5ab; }
+.hover\:text-gold:hover { color: #d4af37; }
+.text-text-primary { color: #f4f4f5; }
+.text-text-secondary { color: #a1a1aa; }
+.text-text-muted { color: #71717a; }
+.font-display { font-family: 'Cinzel', serif; }

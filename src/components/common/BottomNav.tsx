@@ -45,13 +45,13 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab })
       { id: 'profile', label: 'My Profile', icon: User }
     ];
   } else if (currentPartner?.category === 'THEATRE_PARTNER') {
-    // For theatre owners: Home | Bookings | Manage | Payments | Profile
+    // For theatre owners: Home | Seat Map | Shows | Bookings | Revenue
     navItems = [
       { id: 'overview', label: 'Home', icon: Home },
+      { id: 'seats', label: 'Seat Map', icon: Sliders },
+      { id: 'shows', label: 'Shows', icon: Calendar },
       { id: 'bookings', label: 'Bookings', icon: Ticket },
-      { id: 'manage', label: 'Manage', icon: Sliders },
-      { id: 'payments', label: 'Payments', icon: CreditCard },
-      { id: 'profile', label: 'Profile', icon: User }
+      { id: 'revenue', label: 'Revenue', icon: CreditCard }
     ];
   } else if (currentPartner?.category === 'EVENT_ORGANIZER') {
     // For event organizers: Home | Events | Bookings | Payments | Profile
