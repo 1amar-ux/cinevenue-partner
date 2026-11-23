@@ -65,6 +65,11 @@ export interface PartnerBusiness {
   appliedAt: string;
   approvedAt?: string;
   activeLocationId?: string;
+  resubmissionNotes?: string;
+  theatresCount?: number;
+  screensCount?: number;
+  eventsCount?: number;
+  grossRevenue?: number;
 }
 
 export interface SeatCategory {

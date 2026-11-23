@@ -30,7 +30,8 @@ export const Header: React.FC = () => {
     setActiveLocationId,
     switchPresetAccount,
     viewMode,
-    setViewMode
+    setViewMode,
+    logout
   } = useApp();
 
   const [isRoleMenuOpen, setIsRoleMenuOpen] = useState(false);
@@ -89,6 +90,13 @@ export const Header: React.FC = () => {
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/20">
             <Clock className="w-3.5 h-3.5 animate-pulse" />
             Pending Verification
+          </span>
+        );
+      case 'MORE_INFO_REQUIRED':
+        return (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-md bg-blue-500/10 text-blue-400 border border-blue-500/20">
+            <HelpCircle className="w-3.5 h-3.5" />
+            More Info Required
           </span>
         );
       case 'REJECTED':
@@ -379,6 +387,16 @@ export const Header: React.FC = () => {
                     <span>Become a Partner Registration</span>
                   </div>
                 </button>
+
+                <div className="pt-2 border-t border-zinc-800">
+                  <button
+                    onClick={() => { logout(); setIsRoleMenuOpen(false); }}
+                    className="w-full text-left p-2 rounded-lg bg-zinc-900 hover:bg-rose-500/20 text-zinc-400 hover:text-rose-300 flex items-center gap-2 text-xs transition-colors cursor-pointer"
+                  >
+                    <LogOut className="w-4 h-4 text-rose-400" />
+                    <span>Sign Out & Return to Welcome Screen</span>
+                  </button>
+                </div>
               </div>
             </div>
           )}

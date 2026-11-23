@@ -31,13 +31,15 @@ import {
 export type ViewMode = 'RESPONSIVE' | 'MOBILE_IPHONE' | 'MOBILE_ANDROID' | 'TABLET';
 
 export interface AppUserSession {
-  type: 'OWNER' | 'MANAGER' | 'EMPLOYEE' | 'ADMIN' | 'REGISTRATION';
+  type: 'OWNER' | 'MANAGER' | 'EMPLOYEE' | 'ADMIN' | 'REGISTRATION' | 'WELCOME' | 'STATUS_CHECK';
   partnerId: string;
   employeeId?: string;
   name: string;
   mobile: string;
   role: UserRole;
   permissions: Permission[];
+  adminToken?: string;
+  partnerToken?: string;
 }
 
 interface AppContextType {
@@ -63,6 +65,19 @@ interface AppContextType {
   events: CineEvent[];
   settlements: Settlement[];
   auditLogs: AuditLog[];
+
+  // Admin Tab Control
+  activeAdminTab: 'AUTHPANEL' | 'PARTNERS' | 'AUDIT_LOGS';
+  setActiveAdminTab: (tab: 'AUTHPANEL' | 'PARTNERS' | 'AUDIT_LOGS') => void;
+
+  // Auth & Navigation Actions
+  loginPartner: (identifier: string, password?: string) => Promise<{ success: boolean; message: string; partner?: PartnerBusiness; status?: ApprovalStatus }>;
+  loginAdmin: (credentials: { username: string; password?: string; passcode?: string }) => Promise<{ success: boolean; message: string }>;
+  logout: () => void;
+  openRegistration: () => void;
+  openStatusCheck: (partnerId?: string) => void;
+  checkApplicationStatus: (identifier: string) => Promise<PartnerBusiness | null>;
+  resubmitPartnerInfo: (partnerId: string, notes: string, docs?: any[]) => Promise<boolean>;
 
   // Actions
   refreshPartners: () => Promise<void>;
@@ -139,35 +154,41 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [blockedSeats, setBlockedSeats] = useState<Record<string, string[]>>({});
 
   const [viewMode, setViewMode] = useState<ViewMode>('RESPONSIVE');
+  const [activeAdminTab, setActiveAdminTab] = useState<'AUTHPANEL' | 'PARTNERS' | 'AUDIT_LOGS'>('AUTHPANEL');
 
-  // Default initial session: Theatre Partner Owner (Approved)
-  const [userSession, setUserSession] = useState<AppUserSession>({
-    type: 'OWNER',
-    partnerId: 'PARTNER-THEATRE-001',
-    name: 'Vikramaditya Rao',
-    mobile: '+91 98765 43210',
-    role: 'OWNER',
-    permissions: [
-      'QR_SCANNING',
-      'TICKET_VERIFICATION',
-      'POS_BOOKING',
-      'SHOW_TIMINGS',
-      'VIEW_SCREENS',
-      'CUSTOMER_ASSIST',
-      'REVENUE_VIEW',
-      'EMPLOYEE_ADMIN',
-      'BANK_SETTINGS',
-      'BUSINESS_SETTINGS'
-    ]
+  // Default initial session: Welcome Entry Screen or Persisted Session
+  const [userSession, setUserSession] = useState<AppUserSession>(() => {
+    const saved = localStorage.getItem(STORAGE_PREFIX + 'user_session');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed && parsed.type) return parsed;
+      } catch (e) {
+        // fallback
+      }
+    }
+    return {
+      type: 'WELCOME',
+      partnerId: '',
+      name: '',
+      mobile: '',
+      role: 'OWNER',
+      permissions: []
+    };
   });
 
-  // Current active partner object
-  const currentPartner = partners.find(p => p.id === userSession.partnerId) || partners[0];
+  // Current active partner object (null if unauthenticated welcome screen)
+  const currentPartner = partners.find(p => p.id === userSession.partnerId) || (userSession.type === 'WELCOME' ? null : partners[0]);
 
   // Active Location ID for Multi-location Theatre partners
   const [activeLocationId, setActiveLocationId] = useState<string | null>(() => {
     return currentPartner?.activeLocationId || 'LOC-PUNE-01';
   });
+
+  // Sync session state to local storage
+  useEffect(() => {
+    localStorage.setItem(STORAGE_PREFIX + 'user_session', JSON.stringify(userSession));
+  }, [userSession]);
 
   // Sync state to local storage
   useEffect(() => {
@@ -417,9 +438,255 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         });
         break;
 
+      case 'WELCOME':
+        setUserSession({
+          type: 'WELCOME',
+          partnerId: '',
+          name: '',
+          mobile: '',
+          role: 'OWNER',
+          permissions: []
+        });
+        break;
+
       default:
         break;
     }
+  };
+
+  const loginPartner = async (identifier: string, password?: string) => {
+    const cleanId = identifier.trim().toLowerCase();
+    
+    // 1. Try backend POST /api/partners/login
+    try {
+      const res = await fetch('/api/partners/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: cleanId, mobile: cleanId, password })
+      });
+      const data = await res.json();
+      
+      if (data && data.partner) {
+        const bp = mapBackendPartner(data.partner);
+        setPartners(prev => {
+          const map = new Map<string, PartnerBusiness>();
+          prev.forEach(p => map.set(p.id, p));
+          map.set(bp.id, bp);
+          return Array.from(map.values());
+        });
+
+        if (data.success && bp.status === 'APPROVED') {
+          setUserSession({
+            type: 'OWNER',
+            partnerId: bp.id,
+            name: bp.ownerName,
+            mobile: bp.mobile,
+            role: 'OWNER',
+            permissions: [
+              'QR_SCANNING', 'TICKET_VERIFICATION', 'POS_BOOKING', 'SHOW_TIMINGS',
+              'VIEW_SCREENS', 'CUSTOMER_ASSIST', 'REVENUE_VIEW', 'EMPLOYEE_ADMIN',
+              'BANK_SETTINGS', 'BUSINESS_SETTINGS'
+            ],
+            partnerToken: data.token
+          });
+          setActiveLocationId(bp.activeLocationId || 'LOC-PUNE-01');
+          addAuditLog('PARTNER_LOGIN', `Partner '${bp.businessName}' logged in successfully.`);
+          return { success: true, message: 'Login successful.', partner: bp, status: 'APPROVED' };
+        } else {
+          // Gated statuses: PENDING, UNDER_REVIEW, MORE_INFO_REQUIRED, REJECTED, SUSPENDED
+          setUserSession({
+            type: 'OWNER',
+            partnerId: bp.id,
+            name: bp.ownerName,
+            mobile: bp.mobile,
+            role: 'OWNER',
+            permissions: []
+          });
+          return {
+            success: false,
+            message: data.message || `Application status: ${bp.status}`,
+            partner: bp,
+            status: bp.status
+          };
+        }
+      }
+    } catch (err) {
+      console.warn('Backend login fallback to local database:', err);
+    }
+
+    // 2. Local database fallback
+    const localMatch = partners.find(p =>
+      p.email.toLowerCase().trim() === cleanId ||
+      p.mobile.replace(/\s+/g, '') === cleanId.replace(/\s+/g, '') ||
+      p.id.toLowerCase() === cleanId
+    );
+
+    if (localMatch) {
+      setUserSession({
+        type: 'OWNER',
+        partnerId: localMatch.id,
+        name: localMatch.ownerName,
+        mobile: localMatch.mobile,
+        role: 'OWNER',
+        permissions: localMatch.status === 'APPROVED' ? [
+          'QR_SCANNING', 'TICKET_VERIFICATION', 'POS_BOOKING', 'SHOW_TIMINGS',
+          'VIEW_SCREENS', 'CUSTOMER_ASSIST', 'REVENUE_VIEW', 'EMPLOYEE_ADMIN',
+          'BANK_SETTINGS', 'BUSINESS_SETTINGS'
+        ] : []
+      });
+      if (localMatch.status === 'APPROVED') {
+        setActiveLocationId(localMatch.activeLocationId || 'LOC-PUNE-01');
+        return { success: true, message: 'Login successful.', partner: localMatch, status: 'APPROVED' };
+      } else {
+        return {
+          success: false,
+          message: `Application status: ${localMatch.status}`,
+          partner: localMatch,
+          status: localMatch.status
+        };
+      }
+    }
+
+    return { success: false, message: 'No registered partner account found with these credentials. Please register or check application status.' };
+  };
+
+  const loginAdmin = async (credentials: { username: string; password?: string; passcode?: string }) => {
+    const { username, password = '', passcode = '' } = credentials;
+    const cleanUser = username.trim().toLowerCase();
+    const cleanPass = password.trim();
+    const cleanPin = passcode.trim();
+
+    // Check 1: Passcode 8888 or custom admin passcode
+    const isPinValid = cleanPin === '8888' || cleanPin === 'admin8888' || cleanPass === '8888' || cleanPass === 'admin8888';
+    
+    // Check 2: Super Admin credentials (email + password: 'superadmin@cinevenue.com' / 'admin' / 'superadmin' and password 'asdfghjkl')
+    const isCredsValid =
+      (cleanUser === 'superadmin@cinevenue.com' || cleanUser === 'admin' || cleanUser === 'superadmin' || cleanUser === 'founder') &&
+      (cleanPass === 'asdfghjkl' || cleanPass === 'admin8888' || cleanPass === '8888');
+
+    // Check 3: Backend verification attempt
+    let backendSuccess = false;
+    try {
+      const res = await fetch('/api/partners/stats/summary', {
+        headers: { 'x-admin-passcode': cleanPin || cleanPass || '8888' }
+      });
+      if (res.ok) {
+        backendSuccess = true;
+      }
+    } catch (e) {
+      // ignore
+    }
+
+    if (isPinValid || isCredsValid || (backendSuccess && (cleanPin || cleanPass))) {
+      setUserSession({
+        type: 'ADMIN',
+        partnerId: 'ADMIN-PORTAL',
+        name: 'CineVenue Super Admin',
+        mobile: '+91 1800 200 999',
+        role: 'ADMIN',
+        permissions: [
+          'QR_SCANNING', 'TICKET_VERIFICATION', 'POS_BOOKING', 'SHOW_TIMINGS',
+          'VIEW_SCREENS', 'CUSTOMER_ASSIST', 'REVENUE_VIEW', 'EMPLOYEE_ADMIN',
+          'BANK_SETTINGS', 'BUSINESS_SETTINGS'
+        ],
+        adminToken: 'admin_session_' + Date.now()
+      });
+      setActiveAdminTab('AUTHPANEL');
+      addAuditLog('ADMIN_AUTHENTICATED', 'Super Admin verified credentials and unlocked Founder Control Hub.');
+      return { success: true, message: 'Super Admin authentication verified.' };
+    }
+
+    return { success: false, message: 'Access Denied: Invalid Master Admin credentials or security passcode.' };
+  };
+
+  const logout = () => {
+    setUserSession({
+      type: 'WELCOME',
+      partnerId: '',
+      name: '',
+      mobile: '',
+      role: 'OWNER',
+      permissions: []
+    });
+    localStorage.removeItem(STORAGE_PREFIX + 'user_session');
+    addAuditLog('USER_LOGOUT', 'User logged out and returned to Welcome screen.');
+  };
+
+  const openRegistration = () => {
+    setUserSession({
+      type: 'REGISTRATION',
+      partnerId: 'NEW-APPLICANT',
+      name: 'Guest Applicant',
+      mobile: '',
+      role: 'OWNER',
+      permissions: []
+    });
+  };
+
+  const openStatusCheck = (partnerId?: string) => {
+    if (partnerId) {
+      const match = partners.find(p => p.id === partnerId);
+      if (match) {
+        setUserSession({
+          type: 'STATUS_CHECK',
+          partnerId: match.id,
+          name: match.ownerName,
+          mobile: match.mobile,
+          role: 'OWNER',
+          permissions: []
+        });
+        return;
+      }
+    }
+    setUserSession({
+      type: 'STATUS_CHECK',
+      partnerId: partners[0]?.id || '',
+      name: '',
+      mobile: '',
+      role: 'OWNER',
+      permissions: []
+    });
+  };
+
+  const checkApplicationStatus = async (identifier: string): Promise<PartnerBusiness | null> => {
+    const q = identifier.trim().toLowerCase();
+    await refreshPartners();
+    const match = partners.find(p =>
+      p.id.toLowerCase() === q ||
+      p.email.toLowerCase() === q ||
+      p.mobile.replace(/\s+/g, '') === q.replace(/\s+/g, '') ||
+      p.businessName.toLowerCase().includes(q)
+    );
+    return match || null;
+  };
+
+  const resubmitPartnerInfo = async (partnerId: string, notes: string, docs?: any[]): Promise<boolean> => {
+    try {
+      const res = await fetch(`/api/partners/${partnerId}/resubmit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ notes, documents: docs })
+      });
+      if (res.ok) {
+        await refreshPartners();
+        return true;
+      }
+    } catch (e) {
+      console.warn('Resubmit error:', e);
+    }
+
+    setPartners(prev => prev.map(p => {
+      if (p.id === partnerId) {
+        return {
+          ...p,
+          status: 'UNDER_REVIEW',
+          moreInfoRequiredText: undefined,
+          resubmissionNotes: notes
+        };
+      }
+      return p;
+    }));
+    return true;
   };
 
   const registerPartner = (partnerData: Omit<PartnerBusiness, 'id' | 'status' | 'appliedAt'>) => {
@@ -713,6 +980,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         events,
         settlements,
         auditLogs,
+        activeAdminTab,
+        setActiveAdminTab,
+        loginPartner,
+        loginAdmin,
+        logout,
+        openRegistration,
+        openStatusCheck,
+        checkApplicationStatus,
+        resubmitPartnerInfo,
         refreshPartners,
         switchPresetAccount,
         registerPartner,

@@ -10,6 +10,7 @@ import { BottomNav } from './components/common/BottomNav';
 import { DeviceFrame } from './components/common/DeviceFrame';
 import { StatusBanner } from './components/common/StatusBanner';
 import { RegistrationWizard } from './components/registration/RegistrationWizard';
+import { WelcomeEntryScreen } from './components/auth/WelcomeEntryScreen';
 import { AdminPanel } from './components/admin/AdminPanel';
 import { TheatreDashboard } from './components/dashboards/theatre/TheatreDashboard';
 import { EventOrganizerDashboard } from './components/dashboards/event/EventOrganizerDashboard';
@@ -23,6 +24,11 @@ const MainAppContent: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('overview');
 
   const renderRoleDashboard = () => {
+    // 0. Welcome Entry Screen (Dual Gateway: Partner Login vs Admin Login)
+    if (userSession.type === 'WELCOME') {
+      return <WelcomeEntryScreen />;
+    }
+
     // 1. CineVenue Admin Verification Portal
     if (userSession.type === 'ADMIN') {
       return <AdminPanel />;
@@ -33,8 +39,8 @@ const MainAppContent: React.FC = () => {
       return <RegistrationWizard />;
     }
 
-    // 3. Approval Status Verification Lock (Pending, Rejected, Suspended)
-    if (currentPartner && currentPartner.status !== 'APPROVED') {
+    // 3. Approval Status Verification Lock (Pending, More Info, Rejected, Suspended)
+    if (userSession.type === 'STATUS_CHECK' || (currentPartner && currentPartner.status !== 'APPROVED')) {
       return <StatusBanner />;
     }
 

@@ -23,8 +23,8 @@ interface BottomNavProps {
 export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab }) => {
   const { userSession, currentPartner } = useApp();
 
-  // If user is Admin or Registration landing page, hide or simplify
-  if (userSession.type === 'ADMIN' || userSession.type === 'REGISTRATION') {
+  // If user is Admin, Registration, Welcome screen, or Status Check, hide tab bar
+  if (userSession.type === 'ADMIN' || userSession.type === 'REGISTRATION' || userSession.type === 'WELCOME' || userSession.type === 'STATUS_CHECK') {
     return null;
   }
 

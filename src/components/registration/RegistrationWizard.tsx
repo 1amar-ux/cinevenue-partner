@@ -13,12 +13,13 @@ import {
   Building,
   CreditCard,
   FileText,
-  UserCheck
+  UserCheck,
+  ArrowLeft
 } from 'lucide-react';
 import { PartnerCategory } from '../../types';
 
 export const RegistrationWizard: React.FC = () => {
-  const { registerPartner, switchPresetAccount } = useApp();
+  const { registerPartner, switchPresetAccount, logout } = useApp();
 
   const [selectedCategory, setSelectedCategory] = useState<PartnerCategory | null>(null);
   const [step, setStep] = useState<'CATEGORY_SELECT' | 'FORM'>('CATEGORY_SELECT');
@@ -154,6 +155,19 @@ export const RegistrationWizard: React.FC = () => {
   return (
     <div className="max-w-5xl mx-auto p-4 sm:p-8 space-y-8">
       
+      {/* Top Exit Navigation */}
+      <div className="flex items-center justify-between pb-2 border-b border-zinc-800">
+        <button
+          type="button"
+          onClick={logout}
+          className="inline-flex items-center gap-1.5 text-xs text-zinc-400 hover:text-zinc-100 transition-colors cursor-pointer"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>← Return to Welcome / Login Screen</span>
+        </button>
+        <span className="text-[11px] text-zinc-500 font-mono">New Partner Registration Flow</span>
+      </div>
+
       {/* Hero Header */}
       <div className="text-center space-y-3 max-w-2xl mx-auto">
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-semibold tracking-wide uppercase">
