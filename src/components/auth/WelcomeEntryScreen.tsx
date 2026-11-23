@@ -117,7 +117,7 @@ export const WelcomeEntryScreen: React.FC = () => {
           </div>
 
           <p className="text-xs text-zinc-400 max-w-sm mx-auto">
-            Authorized sign-in gateway. Enter your registered mobile number or email address and password.
+            Authorized sign-in gateway for CineVenue business partners & administrators.
           </p>
         </div>
 
@@ -172,7 +172,7 @@ export const WelcomeEntryScreen: React.FC = () => {
                   Account Sign In
                 </h2>
                 <p className="text-xs text-zinc-400">
-                  Enter your registered mobile number or email address and password.
+                  Enter your credentials to access your authorized workspace.
                 </p>
               </div>
 
@@ -254,7 +254,7 @@ export const WelcomeEntryScreen: React.FC = () => {
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
                   <span>256-Bit Encrypted · Role-Based Routing</span>
                 </span>
-                <span>CineVenue Platform</span>
+                <span className="text-zinc-600 font-mono text-[10px]">SECURE GATEWAY</span>
               </div>
             </div>
           )}
