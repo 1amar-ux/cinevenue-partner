@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { X, CalendarRange, PlusCircle, Trash2, MapPin, DollarSign, Users, Ticket, Copy, Check, LayoutDashboard, Landmark, Sparkles, ArrowLeft, Clock, Activity, FileText, Settings, Plus, Percent } from "lucide-react";
+import { X, CalendarRange, PlusCircle, Trash2, MapPin, DollarSign, Users, Ticket, Copy, Check, LayoutDashboard, Landmark, Sparkles, ArrowLeft, Clock, Activity, FileText, Settings, Plus, Percent, LifeBuoy } from "lucide-react";
 import { Event, EventOrganizer, EventRegistration, EventCategory } from "../../../types";
 import ThemeToggle from "../../common/ThemeToggle";
+import { PartnerSupportCentre } from "../../support/PartnerSupportCentre";
+import { OffersPromotionsTab } from "../../promotions/OffersPromotionsTab";
+import { PartnerNotificationCenter } from "../../common/PartnerNotificationCenter";
 
 interface EventManagerDashboardProps {
   organizerId: string;
@@ -28,7 +31,7 @@ export default function EventManagerDashboard({
 }: EventManagerDashboardProps) {
   const organizer = eventOrganizers.find((o) => o.id === organizerId);
   const [copied, setCopied] = useState(false);
-  const [activeTab, setActiveTab] = useState<"overview" | "publish" | "registrations" | "events_list" | "payout_settings">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "publish" | "registrations" | "events_list" | "payout_settings" | "promotions" | "support">("overview");
 
   // Form states for creating event
   const [evtTitle, setEvtTitle] = useState("");
@@ -220,6 +223,7 @@ export default function EventManagerDashboard({
         </div>
 
         <div className="flex items-center gap-3 w-full md:w-auto">
+          <PartnerNotificationCenter onNavigateTab={tab => setActiveTab(tab as any)} />
           <ThemeToggle variant="dropdown" />
           <button
             onClick={handleCopyLink}
@@ -324,6 +328,30 @@ export default function EventManagerDashboard({
             >
               <Landmark className="w-4 h-4" />
               <span>Payout Configuration</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab("promotions")}
+              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-xs font-semibold cursor-pointer border-0 transition-all ${
+                activeTab === "promotions" 
+                  ? "bg-gold/10 text-gold border-l-2 border-gold font-bold" 
+                  : "bg-transparent text-text-secondary hover:bg-white/[0.02] hover:text-text-primary"
+              }`}
+            >
+              <Sparkles className="w-4 h-4" />
+              <span>Offers & Promotions</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab("support")}
+              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-xs font-semibold cursor-pointer border-0 transition-all ${
+                activeTab === "support" 
+                  ? "bg-gold/10 text-gold border-l-2 border-gold font-bold" 
+                  : "bg-transparent text-text-secondary hover:bg-white/[0.02] hover:text-text-primary"
+              }`}
+            >
+              <LifeBuoy className="w-4 h-4" />
+              <span>Support Centre</span>
             </button>
           </nav>
 
@@ -1135,6 +1163,20 @@ export default function EventManagerDashboard({
                   </div>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* ======================= OFFERS & PROMOTIONS TAB ======================= */}
+          {activeTab === "promotions" && (
+            <div className="space-y-6">
+              <OffersPromotionsTab />
+            </div>
+          )}
+
+          {/* ======================= SUPPORT CENTRE TAB ======================= */}
+          {activeTab === "support" && (
+            <div className="space-y-6">
+              <PartnerSupportCentre />
             </div>
           )}
         </main>

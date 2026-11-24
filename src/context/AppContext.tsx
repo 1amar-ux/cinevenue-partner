@@ -13,7 +13,12 @@ import {
   UserRole,
   Permission,
   ApprovalStatus,
-  PartnerCategory
+  PartnerCategory,
+  PartnerNotification,
+  SupportTicket,
+  TicketMessage,
+  PromotionCampaign,
+  PromotionStatus
 } from '../types';
 import {
   INITIAL_PARTNERS,
@@ -27,6 +32,11 @@ import {
   INITIAL_SETTLEMENTS,
   INITIAL_AUDIT_LOGS
 } from '../data/mockData';
+import {
+  INITIAL_NOTIFICATIONS,
+  INITIAL_SUPPORT_TICKETS,
+  INITIAL_PROMOTIONS
+} from '../data/partnerExtensionsMockData';
 
 export type ViewMode =
   | 'RESPONSIVE'
@@ -114,6 +124,24 @@ interface AppContextType {
   // Realtime Seat Map Override
   blockedSeats: Record<string, string[]>; // showId -> seatIds
   toggleSeatBlock: (showId: string, seatId: string) => void;
+
+  // Notifications & Live Alerts
+  notifications: PartnerNotification[];
+  unreadNotificationsCount: number;
+  markNotificationRead: (id: string) => void;
+  markAllNotificationsRead: () => void;
+  clearNotifications: () => void;
+
+  // Dedicated Partner Support Centre
+  supportTickets: SupportTicket[];
+  createSupportTicket: (ticketData: Omit<SupportTicket, 'id' | 'status' | 'createdAt' | 'updatedAt' | 'messages'>) => void;
+  addTicketReply: (ticketId: string, message: string) => void;
+  updateTicketStatus: (ticketId: string, status: SupportTicket['status']) => void;
+
+  // Offers & Promotional Campaigns
+  promotions: PromotionCampaign[];
+  createPromotion: (promoData: Omit<PromotionCampaign, 'id' | 'currentRedemptions' | 'revenueGenerated' | 'status' | 'createdAt'>) => void;
+  updatePromotionStatus: (id: string, status: PromotionStatus) => void;
 }
 
 const STORAGE_PREFIX = 'cinevenue_partner_v1_';
@@ -161,6 +189,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [settlements] = useState<Settlement[]>(INITIAL_SETTLEMENTS);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>(INITIAL_AUDIT_LOGS);
+
+  // Notifications state
+  const [notifications, setNotifications] = useState<PartnerNotification[]>(() => {
+    const saved = localStorage.getItem(STORAGE_PREFIX + 'notifications');
+    return saved ? JSON.parse(saved) : INITIAL_NOTIFICATIONS;
+  });
+
+  // Support tickets state
+  const [supportTickets, setSupportTickets] = useState<SupportTicket[]>(() => {
+    const saved = localStorage.getItem(STORAGE_PREFIX + 'support_tickets');
+    return saved ? JSON.parse(saved) : INITIAL_SUPPORT_TICKETS;
+  });
+
+  // Promotions and campaigns state
+  const [promotions, setPromotions] = useState<PromotionCampaign[]>(() => {
+    const saved = localStorage.getItem(STORAGE_PREFIX + 'promotions');
+    return saved ? JSON.parse(saved) : INITIAL_PROMOTIONS;
+  });
 
   const [blockedSeats, setBlockedSeats] = useState<Record<string, string[]>>({});
 
@@ -229,6 +275,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     localStorage.setItem(STORAGE_PREFIX + 'events', JSON.stringify(events));
   }, [events]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_PREFIX + 'notifications', JSON.stringify(notifications));
+  }, [notifications]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_PREFIX + 'support_tickets', JSON.stringify(supportTickets));
+  }, [supportTickets]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_PREFIX + 'promotions', JSON.stringify(promotions));
+  }, [promotions]);
 
   const mapBackendPartner = (bp: any): PartnerBusiness => {
     return {
@@ -1019,6 +1077,91 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
   };
 
+  // Notification actions
+  const unreadNotificationsCount = notifications.filter(n => !n.isRead).length;
+
+  const markNotificationRead = (id: string) => {
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
+  };
+
+  const markAllNotificationsRead = () => {
+    setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+  };
+
+  const clearNotifications = () => {
+    setNotifications([]);
+  };
+
+  // Support ticket actions
+  const createSupportTicket = (ticketData: Omit<SupportTicket, 'id' | 'status' | 'createdAt' | 'updatedAt' | 'messages'>) => {
+    const newId = `TKT-${Math.floor(1000 + Math.random() * 9000)}`;
+    const now = new Date().toISOString().replace('T', ' ').slice(0, 16);
+    const newTicket: SupportTicket = {
+      ...ticketData,
+      id: newId,
+      status: 'OPEN',
+      createdAt: now,
+      updatedAt: now,
+      messages: [
+        {
+          id: `MSG-${Date.now()}`,
+          senderName: ticketData.partnerName,
+          senderRole: 'PARTNER',
+          message: ticketData.description,
+          timestamp: now
+        }
+      ]
+    };
+    setSupportTickets(prev => [newTicket, ...prev]);
+    addAuditLog('SUPPORT_TICKET_RAISED', `Ticket ${newId} (${ticketData.category}): ${ticketData.subject}`);
+  };
+
+  const addTicketReply = (ticketId: string, message: string) => {
+    const now = new Date().toISOString().replace('T', ' ').slice(0, 16);
+    setSupportTickets(prev => prev.map(ticket => {
+      if (ticket.id === ticketId) {
+        return {
+          ...ticket,
+          updatedAt: now,
+          messages: [
+            ...ticket.messages,
+            {
+              id: `MSG-${Date.now()}`,
+              senderName: currentPartner?.businessName || userSession.name || 'Partner Account',
+              senderRole: 'PARTNER',
+              message,
+              timestamp: now
+            }
+          ]
+        };
+      }
+      return ticket;
+    }));
+  };
+
+  const updateTicketStatus = (ticketId: string, status: SupportTicket['status']) => {
+    const now = new Date().toISOString().replace('T', ' ').slice(0, 16);
+    setSupportTickets(prev => prev.map(t => t.id === ticketId ? { ...t, status, updatedAt: now } : t));
+  };
+
+  // Promotion and campaign actions
+  const createPromotion = (promoData: Omit<PromotionCampaign, 'id' | 'currentRedemptions' | 'revenueGenerated' | 'status' | 'createdAt'>) => {
+    const newPromo: PromotionCampaign = {
+      ...promoData,
+      id: `PROMO-${Date.now().toString().slice(-4)}`,
+      currentRedemptions: 0,
+      revenueGenerated: 0,
+      status: 'PENDING_APPROVAL',
+      createdAt: new Date().toISOString().replace('T', ' ').slice(0, 16)
+    };
+    setPromotions(prev => [newPromo, ...prev]);
+    addAuditLog('CAMPAIGN_CREATED', `Created campaign ${newPromo.campaignName} (Code: ${newPromo.code})`);
+  };
+
+  const updatePromotionStatus = (id: string, status: PromotionStatus) => {
+    setPromotions(prev => prev.map(p => p.id === id ? { ...p, status } : p));
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -1065,7 +1208,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         addTheatreLocation,
         createEvent,
         blockedSeats,
-        toggleSeatBlock
+        toggleSeatBlock,
+        notifications,
+        unreadNotificationsCount,
+        markNotificationRead,
+        markAllNotificationsRead,
+        clearNotifications,
+        supportTickets,
+        createSupportTicket,
+        addTicketReply,
+        updateTicketStatus,
+        promotions,
+        createPromotion,
+        updatePromotionStatus
       }}
     >
       {children}

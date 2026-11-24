@@ -409,3 +409,81 @@ export interface EventRegistration {
   superadminApproved?: boolean;
 }
 
+export type NotificationType =
+  | 'BOOKING'
+  | 'CANCELLATION'
+  | 'SETTLEMENT'
+  | 'SHOW_CHANGE'
+  | 'EVENT_UPDATE'
+  | 'ADMIN_REQUEST'
+  | 'STATUS_CHANGE'
+  | 'ANNOUNCEMENT';
+
+export interface PartnerNotification {
+  id: string;
+  type: NotificationType;
+  title: string;
+  message: string;
+  timestamp: string;
+  isRead: boolean;
+  actionUrl?: string;
+  targetRole?: string;
+}
+
+export type TicketCategory =
+  | 'PAYMENTS_SETTLEMENTS'
+  | 'TECHNICAL_SUPPORT'
+  | 'BOOKING_DISCREPANCY'
+  | 'DOCUMENT_VERIFICATION'
+  | 'FEATURE_REQUEST'
+  | 'OTHER';
+
+export type TicketPriority = 'URGENT' | 'HIGH' | 'NORMAL';
+export type TicketStatus = 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
+
+export interface TicketMessage {
+  id: string;
+  senderName: string;
+  senderRole: 'PARTNER' | 'SUPPORT_ADMIN';
+  message: string;
+  timestamp: string;
+}
+
+export interface SupportTicket {
+  id: string;
+  partnerId: string;
+  partnerName: string;
+  category: TicketCategory;
+  priority: TicketPriority;
+  subject: string;
+  description: string;
+  status: TicketStatus;
+  createdAt: string;
+  updatedAt: string;
+  messages: TicketMessage[];
+}
+
+export type PromotionType = 'PERCENT_DISCOUNT' | 'FLAT_DISCOUNT' | 'BUY_ONE_GET_ONE' | 'EARLY_BIRD';
+export type PromotionStatus = 'PENDING_APPROVAL' | 'ACTIVE' | 'REJECTED' | 'EXPIRED';
+
+export interface PromotionCampaign {
+  id: string;
+  partnerId: string;
+  partnerName: string;
+  campaignName: string;
+  code: string;
+  type: PromotionType;
+  discountValue: number;
+  minPurchaseAmount?: number;
+  maxDiscountCap?: number;
+  startDate: string;
+  endDate: string;
+  maxUsageLimit: number;
+  currentRedemptions: number;
+  revenueGenerated: number;
+  status: PromotionStatus;
+  adminNotes?: string;
+  createdAt: string;
+}
+
+

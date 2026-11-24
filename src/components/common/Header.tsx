@@ -20,6 +20,7 @@ import {
   Lock
 } from 'lucide-react';
 import { PartnerCategory } from '../../types';
+import { PartnerNotificationCenter } from './PartnerNotificationCenter';
 
 export const Header: React.FC = () => {
   const {
@@ -252,6 +253,9 @@ export const Header: React.FC = () => {
                   <span className="hidden sm:inline">Lock Admin</span>
                 </button>
               )}
+
+              {/* Live Partner Notifications Center */}
+              <PartnerNotificationCenter />
 
               {/* Account & Role Switcher Simulator Trigger */}
               <div className="relative shrink-0">

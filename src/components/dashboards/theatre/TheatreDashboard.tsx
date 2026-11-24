@@ -27,7 +27,8 @@ import {
   Moon,
   Building2,
   CheckCircle2,
-  Activity
+  Activity,
+  LifeBuoy
 } from 'lucide-react';
 import { Theatre, Booking, MovieSchedule, Movie } from '../../../types';
 
@@ -46,6 +47,9 @@ import StaffSubpage from './theatre-admin/Staff';
 import SettingsSubpage from './theatre-admin/Settings';
 import QRScannerSubpage from './theatre-admin/QRScanner';
 import TheatreOnboardingWizard from './theatre-admin/TheatreOnboardingWizard';
+import { PartnerSupportCentre } from '../../support/PartnerSupportCentre';
+import { OffersPromotionsTab } from '../../promotions/OffersPromotionsTab';
+import { PartnerNotificationCenter } from '../../common/PartnerNotificationCenter';
 
 interface TheatreDashboardProps {
   activeTab?: string;
@@ -173,10 +177,12 @@ export const TheatreDashboard: React.FC<TheatreDashboardProps> = ({
     { id: 'shows', label: 'Shows', icon: CalendarRange },
     { id: 'bookings', label: 'Bookings', icon: Ticket },
     { id: 'food', label: 'Food & Beverages', icon: Sparkles },
-    { id: 'coupons', label: 'Coupons', icon: Tag },
+    { id: 'coupons', label: 'Coupons & Vouchers', icon: Tag },
+    { id: 'promotions', label: 'Offers & Campaigns', icon: Sparkles },
     { id: 'reports', label: 'Reports', icon: PieChart },
     { id: 'staff', label: 'Staff', icon: Users },
     { id: 'qr-scanner', label: 'QR Scanner', icon: QrCode },
+    { id: 'support', label: 'Support Centre', icon: LifeBuoy },
     { id: 'settings', label: 'Settings', icon: Settings }
   ];
 
@@ -371,11 +377,15 @@ export const TheatreDashboard: React.FC<TheatreDashboardProps> = ({
       case 'food':
         return <FoodSubpage theatreId={selectedTheatre.id} />;
       case 'coupons':
-        return <CouponsSubpage theatreId={selectedTheatre.id} />;
+        return <OffersPromotionsTab />;
+      case 'promotions':
+        return <OffersPromotionsTab />;
       case 'staff':
         return <StaffSubpage theatreId={selectedTheatre.id} />;
       case 'qr-scanner':
         return <QRScannerSubpage theatreName={selectedTheatre.name} bookings={formattedBookings} />;
+      case 'support':
+        return <PartnerSupportCentre />;
       case 'settings':
         return (
           <SettingsSubpage
@@ -594,6 +604,9 @@ export const TheatreDashboard: React.FC<TheatreDashboardProps> = ({
             <span className="text-[11px] font-mono text-zinc-500 hidden lg:inline">
               Venue ID: #{selectedTheatre.id}
             </span>
+
+            {/* Real-time Notifications Bell Drawer */}
+            <PartnerNotificationCenter onNavigateTab={tab => setActiveTab(tab)} />
 
             {/* Theme Toggle Button */}
             <div className="relative">
